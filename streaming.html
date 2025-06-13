@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Services Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Window Controls */
+        .window-controls {
+            background: rgba(12, 12, 12, 0.95);
+            backdrop-filter: blur(30px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+            position: relative;
+            z-index: 101;
+        }
+
+        .app-title {
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .minimize {
+            background: #fbbf24;
+            color: #92400e;
+        }
+
+        .minimize:hover {
+            background: #f59e0b;
+            transform: scale(1.1);
+        }
+
+        .close {
+            background: #ef4444;
+            color: white;
+        }
+
+        .close:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        /* Enhanced animated background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(147, 51, 234, 0.1), rgba(59, 130, 246, 0.1));
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            filter: blur(1px);
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg) scale(1); 
+                opacity: 0.3;
+            }
+            33% { 
+                transform: translateY(-30px) rotate(120deg) scale(1.1); 
+                opacity: 0.6;
+            }
+            66% { 
+                transform: translateY(-10px) rotate(240deg) scale(0.9); 
+                opacity: 0.4;
+            }
+        }
+
+        /* Gradient orbs for background */
+        .background-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.1;
+            animation: slowFloat 20s ease-in-out infinite;
+        }
+
+        .orb1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(45deg, #9333ea, #3b82f6);
+            top: 10%;
+            left: 10%;
+        }
+
+        .orb2 {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #06b6d4, #8b5cf6);
+            top: 60%;
+            right: 10%;
+            animation-delay: -10s;
+        }
+
+        @keyframes slowFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .navbar {
+            background: rgba(12, 12, 12, 0.95);
+            backdrop-filter: blur(30px);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 40px rgba(147, 51, 234, 0.1);
+            position: relative;
+            z-index: 100;
+            border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .navbar h1 {
+            background: linear-gradient(135deg, #9333ea, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 30px rgba(147, 51, 234, 0.3);
+            letter-spacing: -0.02em;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1.2rem 2.5rem;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 50px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .tab:hover::before {
+            left: 100%;
+        }
+
+        .tab:hover {
+            background: rgba(147, 51, 234, 0.2);
+            border-color: rgba(147, 51, 234, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(147, 51, 234, 0.2);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(59, 130, 246, 0.3));
+            border-color: rgba(147, 51, 234, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(147, 51, 234, 0.3);
+        }
+
+        .content {
+            max-width: 1400px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(26, 26, 26, 0.6);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        .home-content {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .home-content h2 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #e0e0e0, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .home-content p {
+            font-size: 1.4rem;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .feature-item {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 3rem 2rem;
+            border-radius: 25px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #9333ea, #3b82f6, #06b6d4);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 60px rgba(147, 51, 234, 0.15);
+            border-color: rgba(147, 51, 234, 0.4);
+        }
+
+        .feature-item h3 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-item p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .streaming-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .streaming-item {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 25px;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .streaming-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(147, 51, 234, 0.1), transparent);
+            animation: rotate 8s linear infinite;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .streaming-item:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .streaming-item:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(147, 51, 234, 0.2);
+            border-color: rgba(147, 51, 234, 0.5);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            background-color: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .vexo-banner {
+            background: linear-gradient(135deg, #9333ea, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.2rem;
+            font-weight: 700;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(147, 51, 234, 0.9);
+            color: white !important;
+            -webkit-text-fill-color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+        }
+
+        .streaming-item h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f0f0f0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .streaming-item p {
+            margin-bottom: 2rem;
+            opacity: 0.8;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+
+        .streaming-link {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, #9333ea, #3b82f6);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            margin-top: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .streaming-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .streaming-link:hover::before {
+            left: 100%;
+        }
+
+        .streaming-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(147, 51, 234, 0.4);
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #e0e0e0, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 1024px) {
+            .navbar h1 {
+                font-size: 2.8rem;
+            }
+            
+            .home-content h2 {
+                font-size: 3rem;
+            }
+            
+            .streaming-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1.5rem;
+            }
+            
+            .navbar h1 {
+                font-size: 2.2rem;
+            }
+            
+            .tabs {
+                gap: 1rem;
+            }
+            
+            .tab {
+                padding: 1rem 1.8rem;
+                font-size: 1rem;
+            }
+
+            .home-content h2 {
+                font-size: 2.5rem;
+            }
+            
+            .content {
+                padding: 0 1.5rem;
+            }
+            
+            .tab-content {
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tab {
+                flex: 1;
+                min-width: 0;
+                padding: 0.9rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .streaming-grid,
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar h1 {
+                font-size: 1.8rem;
+            }
+            
+            .home-content h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-orbs">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+    </div>
+    <div class="particles"></div>
+
+    <!-- Window Controls -->
+    <div class="window-controls">
+        <div class="app-title">MXT SERVICES</div>
+        <div class="controls">
+            <button class="control-btn minimize">—</button>
+            <button class="control-btn close">×</button>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <h1>StreamVerse Hub</h1>
+        <div class="tabs">
+            <button class="tab active" onclick="openTab('home')">Home</button>
+            <button class="tab" onclick="openTab('anime')">Anime</button>
+            <button class="tab" onclick="openTab('manga')">Manga</button>
+            <button class="tab" onclick="openTab('movies')">Movies</button>
+            <button class="tab" onclick="openTab('tvshows')">TV Shows</button>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div id="home" class="tab-content active">
+            <div class="home-content">
+                <h2>Welcome to StreamVerse</h2>
+                <p>Your ultimate entertainment destination featuring the best streaming platforms for anime, manga, movies, and TV shows. Discover premium content across multiple categories.</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <h3>🎌</h3>
+                        <h4>Anime Streaming</h4>
+                        <p>Access premium anime platforms with high-quality content and seamless streaming experience</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>📚</h3>
+                        <h4>Manga Reading</h4>
+                        <p>Enjoy extensive manga collections with crystal-clear images and intuitive reading interface</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>🎬</h3>
+                        <h4>Movie Collection</h4>
+                        <p>Stream the latest blockbusters and classic films in stunning quality</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>📺</h3>
+                        <h4>TV Series</h4>
+                        <p>Binge-watch popular TV shows and discover new series across all genres</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="anime" class="tab-content">
+            <h2 class="section-title">Anime Streaming Platforms</h2>
+            <div class="streaming-grid">
+                <div class="streaming-item">
+                    <div class="image-placeholder" style="background-image: url('https://cdn.discordapp.com/attachments/1323146379593383947/1383154103495950427/image.png?ex=684dc224&is=684c70a4&hm=85082a7057fe593e87ddbd30015393f21fe042538d9b4d6e69704e2220bf4529&')"></div>
+                    <h3>HiAnimeZ</h3>
+                    <p>Premium anime streaming platform with extensive library featuring the latest episodes and classic series in HD quality.</p>
+                    <a href="https://hianimez.to/" target="_blank" class="streaming-link">Watch Anime</a>
+                </div>
+                <div class="streaming-item">
+                    <div class="image-placeholder" style="background-image: url('https://cdn.discordapp.com/attachments/1312563175677366322/1383155594143338567/image.png?ex=684dc387&is=684c7207&hm=52da9ab00159c4279b1dbc22357f5f62e6c64c268b94f07878deac80e27df8f9&')">
+                        <div class="vexo-banner">VEXO</div>
+                    </div>
+                    <h3>Vexo Anime</h3>
+                    <p>High-quality anime streaming with advanced features, multiple servers, and an intuitive user interface for the best viewing experience.</p>
+                    <a href="https://vexo.to" target="_blank" class="streaming-link">Watch Anime</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="manga" class="tab-content">
+            <h2 class="section-title">Manga Reading Platforms</h2>
+            <div class="streaming-grid">
+                <div class="streaming-item">
+                    <div class="image-placeholder">
+                        <div class="vexo-banner">VEXO</div>
+                        📚 Premium Manga Platform
+                    </div>
+                    <h3>Vexo Manga</h3>
+                    <p>Extensive manga collection with crystal-clear image quality, fast loading times, and comprehensive library spanning all genres.</p>
+                    <a href="https://vexo.to" target="_blank" class="streaming-link">Read Manga</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="movies" class="tab-content">
+            <h2 class="section-title">Movie Streaming Platforms</h2>
+            <div class="streaming-grid">
+                <div class="streaming-item">
+                    <div class="image-placeholder">
+                        <div class="vexo-banner">VEXO</div>
+                        🎬 Cinema Collection
+                    </div>
+                    <h3>Vexo Movies</h3>
+                    <p>Stream the latest blockbuster movies and timeless classics in premium quality with multiple viewing options and subtitle support.</p>
+                    <a href="https://vexo.to" target="_blank" class="streaming-link">Watch Movies</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="tvshows" class="tab-content">
+            <h2 class="section-title">TV Show Streaming Platforms</h2>
+            <div class="streaming-grid">
+                <div class="streaming-item">
+                    <div class="image-placeholder">
+                        <div class="vexo-banner">VEXO</div>
+                        📺 Series Collection
+                    </div>
+                    <h3>Vexo TV Shows</h3>
+                    <p>Discover and binge-watch popular TV series across all genres with organized seasons, episode tracking, and seamless streaming.</p>
+                    <a href="https://vexo.to" target="_blank" class="streaming-link">Watch Shows</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced particle system
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const numberOfParticles = 80;
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                const size = Math.random() * 8 + 3;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                particle.style.animationDelay = `${Math.random() * 8}s`;
+                particle.style.animationDuration = `${Math.random() * 4 + 6}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function openTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let content of tabContents) {
+                content.classList.remove('active');
+            }
+
+            // Remove active class from all tabs
+            const tabs = document.getElementsByClassName('tab');
+            for (let tab of tabs) {
+                tab.classList.remove('active');
+            }
+
+            // Show the selected tab content with animation delay
+            setTimeout(() => {
+                document.getElementById(tabName).classList.add('active');
+            }, 150);
+            
+            event.currentTarget.classList.add('active');
+        }
+
+        // Initialize particles and add smooth scroll behavior
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            
+            // Add smooth transitions for better UX
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+
+        // Add hover sound effect simulation (visual feedback)
+        document.querySelectorAll('.streaming-link, .tab').forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                this.style.transform = this.classList.contains('tab') ? 'translateY(-5px)' : 'translateY(-3px)';
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
